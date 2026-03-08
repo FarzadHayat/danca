@@ -46,6 +46,14 @@ import Layout from '../layouts/Layout.astro';
 							Notify Me
 						</button>
 					</form>
+					<div class="mt-4 flex justify-center">
+						<div 
+							class="cf-turnstile" 
+							data-sitekey="0x4AAAAAACoFz1HMy-1lrRPK" 
+							data-theme="dark"
+							data-size="compact"
+						></div>
+					</div>
 					<p class="text-xs text-slate-500 mt-4">No spam, just dance. Coming Spring 2026.</p>
 				</div>
 
@@ -70,11 +78,19 @@ import Layout from '../layouts/Layout.astro';
 				if (form && formContainer && successMsg && submitBtn) {
 					form.addEventListener('submit', async (e) => {
 						e.preventDefault();
+
+						// Check for turnstile response
+						const formData = new FormData(form);
+						const turnstileResponse = formData.get('cf-turnstile-response');
+
+						if (!turnstileResponse) {
+							alert('Please complete the security check.');
+							return;
+						}
 						
 						submitBtn.innerHTML = '<span class="animate-pulse">Sending...</span>';
 						submitBtn.setAttribute('disabled', 'true');
 
-						const formData = new FormData(form);
 						const data = Object.fromEntries(formData.entries());
 						
 						try {
