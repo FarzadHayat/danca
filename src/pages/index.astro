@@ -71,30 +71,36 @@ import Layout from '../layouts/Layout.astro';
 					form.addEventListener('submit', async (e) => {
 						e.preventDefault();
 						
-						// Visual feedback
 						submitBtn.innerHTML = '<span class="animate-pulse">Sending...</span>';
 						submitBtn.setAttribute('disabled', 'true');
 
 						const formData = new FormData(form);
+						const data = Object.fromEntries(formData.entries());
 						
 						try {
 							const response = await fetch('https://formspree.io/f/xdawaoeo', {
 								method: 'POST',
-								body: formData,
+								body: JSON.stringify(data),
 								headers: {
+									'Content-Type': 'application/json',
 									'Accept': 'application/json'
 								}
 							});
 
-							// We transition to success even if the placeholder fails 
-							// for a better prototype experience.
-							formContainer.classList.add('hidden');
-							successMsg.classList.remove('hidden');
+							if (response.ok) {
+								formContainer.classList.add('hidden');
+								successMsg.classList.remove('hidden');
+							} else {
+								const errorData = await response.json();
+								alert(errorData.error || 'Submission failed. Please try again.');
+								submitBtn.innerHTML = 'Notify Me';
+								submitBtn.removeAttribute('disabled');
+							}
 						} catch (error) {
 							console.error('Submission error:', error);
-							// Fallback success for local testing
-							formContainer.classList.add('hidden');
-							successMsg.classList.remove('hidden');
+							alert('Network error. Please check your connection.');
+							submitBtn.innerHTML = 'Notify Me';
+							submitBtn.removeAttribute('disabled');
 						}
 					});
 				}
